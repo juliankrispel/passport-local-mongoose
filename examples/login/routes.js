@@ -2,8 +2,8 @@ var passport = require('passport'),
     Account = require('./models/account');
 
 module.exports = function (app) {
-    
-    app.get('/', function (req, res) {
+    app.get('/', ensureAuthenticated, function (req, res) {
+    console.log(req.user);
         res.render('index', { user : req.user });
     });
 
@@ -12,7 +12,8 @@ module.exports = function (app) {
     });
 
     app.post('/register', function(req, res) {
-        Account.register(new Account({ username : req.body.username }), req.body.password, function(err, account) {
+    console.log(req.body);
+        Account.register(new Account({ username : req.body.username, permissions: [req.body.permission] }), req.body.password, function(err, account) {
             if (err) {
                 return res.render('register', { account : account });
             }
@@ -25,7 +26,7 @@ module.exports = function (app) {
         res.render('login', { user : req.user });
     });
 
-    app.post('/login', passport.authenticate('local'), function(req, res) {
+    app.post('/login', passport.authenticate('local', {failureRedirect: '/login'}), function(req, res) {
         res.redirect('/');
     });
 
@@ -34,3 +35,8 @@ module.exports = function (app) {
         res.redirect('/');
     });
 };
+
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) { return next(); }
+  res.redirect('/login')
+}
