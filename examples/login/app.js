@@ -3,7 +3,8 @@ var path = require('path'),
     http = require('http'),
     mongoose = require('mongoose'),
     passport = require('passport'),
-    LocalStrategy = require('passport-local').Strategy;
+    LocalStrategy = require('passport-local').Strategy,
+    SocketJsServer = require('./lib/socketjsserver.js');
 
 var app = express();
 
@@ -49,6 +50,8 @@ mongoose.connect('mongodb://localhost/passport_local_mongoose_examples');
 // Setup routes
 require('./routes')(app);
 
-http.createServer(app).listen(3000, '127.0.0.1', function() {
+var server = http.createServer(app).listen(3000, '127.0.0.1', function() {
     console.log("Express server listening on %s:%d in %s mode", '127.0.0.1', 3000, app.settings.env);
 });
+
+var sockets = new SocketJsServer(server);

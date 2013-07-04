@@ -1,5 +1,7 @@
 var passport = require('passport'),
-    Account = require('./models/account');
+    Account = require('./models/account'),
+    encrypt = require('./lib/encrypt.js').encrypt,
+    decrypt = require('./lib/encrypt.js').decrypt;
 
 module.exports = function (app) {
     app.get('/', ensureAuthenticated, function (req, res) {
@@ -17,7 +19,6 @@ module.exports = function (app) {
             if (err) {
                 return res.render('register', { account : account });
             }
-
             res.redirect('/');
         });
     });
@@ -27,6 +28,7 @@ module.exports = function (app) {
     });
 
     app.post('/login', passport.authenticate('local', {failureRedirect: '/login'}), function(req, res) {
+        res.cookie('_sa', encrypt(req.user._id, req.user._id));
         res.redirect('/');
     });
 
